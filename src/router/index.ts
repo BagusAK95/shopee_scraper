@@ -1,7 +1,18 @@
-import { Router } from "express";
+import { Router as ExpressRouter } from "express";
 import ShopeeRouter from "./shopee";
+import { SocketServer } from "../infrastructure/socket/socket";
 
-const router = Router();
-router.use("/shopee", ShopeeRouter);
+export class Router {
+    private socket: SocketServer;
+    
+    constructor(socket: SocketServer) {
+        this.socket = socket;
+    }
 
-export default router;
+    init(): ExpressRouter {
+        const router = ExpressRouter();
+        router.use("/shopee", new ShopeeRouter(this.socket).init());
+        
+        return router;
+    }
+}

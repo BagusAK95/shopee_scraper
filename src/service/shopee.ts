@@ -1,15 +1,16 @@
 import createError from "http-errors";
-import { client, requests } from "../infrastructure/wss/wss";
+import { SocketServer } from "../infrastructure/socket/socket";
 
 export default class ShopeeService {
+  private socket: SocketServer;
+
+  constructor(socket: SocketServer) {
+    this.socket = socket;
+  }
+
   async getProduct(shopId: string, itemId: string) {
     try {
-      if (!client || client.readyState !== WebSocket.OPEN) {
-        throw createError.Forbidden("Client not connected");
-      }
-
       const response = await this.sendRequest(shopId, itemId);
-      
       return response;
     } catch (error: any) {
       throw createError(error.statusCode || 500, error.message);
@@ -19,13 +20,12 @@ export default class ShopeeService {
   async sendRequest(shopId: string, itemId: string) {
     return new Promise((resolve, reject) => {
       const key = `${shopId}_${itemId}`;
-
       const timeout = setTimeout(() => {
-        requests.delete(key);
+        this.socket.removeRequest(key);
         reject(new Error("Timeout waiting for response"));
       }, 10000); // 10s timeout
 
-      requests.set(key, {
+      this.socket.addRequest(key, {
         shopId,
         itemId,
         resolve,
@@ -33,7 +33,7 @@ export default class ShopeeService {
         timeout,
       });
 
-      client?.send(JSON.stringify({ shopId, itemId }));
+      this.socket.sendRequest(shopId, itemId);
     }).catch(() => {
       throw createError.GatewayTimeout("Timeout waiting for response");
     });

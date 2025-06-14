@@ -1,11 +1,12 @@
 import { validationResult } from 'express-validator';
 import ShopeeService from '../service/shopee';
+import { SocketServer } from '../infrastructure/socket/socket';
 
 export default class ShopeeController {
   private service: ShopeeService;
 
-  constructor() {
-    this.service = new ShopeeService();
+  constructor(socket: SocketServer) {
+    this.service = new ShopeeService(socket);
   }
 
   /**

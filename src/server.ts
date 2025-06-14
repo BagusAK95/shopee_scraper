@@ -2,10 +2,10 @@
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import router from './router';
 import http from 'http';
-import { WebSocketServer } from './infrastructure/wss/wss';
+import { SocketServer } from './infrastructure/socket/socket';
 import { rateLimiter } from './utils/limiter/limiter';
+import { Router } from './router';
 
 const app = express();
 
@@ -15,12 +15,14 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cors());
 
+// Socket.io server
 const server = http.createServer(app);
-const wss = new WebSocketServer(server);
-wss.listen();
+const socket = new SocketServer(server);
+socket.listen();
 
 // API routes
-app.use('/', router);
+const router = new Router(socket);
+app.use('/', router.init());
 
 // Start server
 const PORT = process.env.PORT || 3000;
