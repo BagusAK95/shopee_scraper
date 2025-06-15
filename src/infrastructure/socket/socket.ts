@@ -54,7 +54,7 @@ export default class SocketServer {
       socket.on("shopee_product_detail_response", (payload: MessageResponse) => {
         const { shopId, itemId, data } = payload;
         const key = `${shopId}_${itemId}`;
-        console.log("💌 Socket.io received message: shopee_product_detail_response", key);
+        console.log(`💌 Socket.io received message from ${socket.data.uuid}: shopee_product_detail_response`, key);
 
         const req = this.requests.get(key);
         if (req) {
@@ -66,6 +66,7 @@ export default class SocketServer {
         // random timeout between 1-3 seconds
         const randomTimeout = Math.floor(Math.random() * 2000) + 1000;
         setTimeout(() => {
+          console.log("🟢 Socket.io client idle:", socket.data.uuid);
           this.clients.set(socket.data.uuid, { socket, state: 'idle' });
         }, randomTimeout);
       });
@@ -95,6 +96,7 @@ export default class SocketServer {
         socket = client.socket;
         if (socket) {
           socket.emit("shopee_product_detail_request", { shopId, itemId });
+          console.log("🟢 Socket.io client busy:", id);
           this.clients.set(id, { socket, state: 'busy' });
           break;
         }
