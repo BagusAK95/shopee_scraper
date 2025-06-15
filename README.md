@@ -66,7 +66,7 @@ shopee_scraper/
   (function () {
     "use strict";
 
-    const SOCKET_IO_SRC = "https://cdn.socket.io/4.7.2/socket.io.min.js";
+    const SOCKET_IO_SRC = "https://cdn.socket.io/4.7.2/socket.io.min.js"; // Match your server version
     const SOCKET_SERVER = "http://127.0.0.1:3000";
 
     let socket = null;
@@ -79,8 +79,22 @@ shopee_scraper/
       document.head.appendChild(script);
     }
 
+    function getClientUUID() {
+      const key = "shopee_collector_uuid";
+      let uuid = sessionStorage.getItem(key);
+      if (!uuid) {
+        uuid = crypto.randomUUID(); // generates per-tab UUID
+        sessionStorage.setItem(key, uuid);
+      }
+      return uuid;
+    }
+
     function connectSocket() {
-      socket = io(SOCKET_SERVER);
+      socket = io(SOCKET_SERVER, {
+        auth: {
+          uuid: getClientUUID()
+        }
+      });
 
       socket.on("connect", () => {
         console.log("[Shopee Collector] Socket.IO connected:", socket.id);
@@ -97,11 +111,19 @@ shopee_scraper/
     }
 
     function handleIncomingTask(shopId, itemId) {
+      const data = localStorage.getItem(`shopee_collector_${shopId}.${itemId}`);
+      if (data) {
+        sendToServer({ shopId, itemId, data: JSON.parse(data) });
+        return;
+      }
+
       const url = `https://shopee.tw/a-i.${shopId}.${itemId}`;
       if (location.href !== url) location.href = url;
     }
 
     function sendToServer(payload) {
+      localStorage.setItem(`shopee_collector_${payload.shopId}.${payload.itemId}`, JSON.stringify(payload.data));
+
       if (socket && socket.connected) {
         socket.emit("shopee_product_detail_response", payload);
         console.log("[Shopee Collector] Sent payload:", payload);
