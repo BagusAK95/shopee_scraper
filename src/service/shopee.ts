@@ -23,7 +23,7 @@ export default class ShopeeService {
       const timeout = setTimeout(() => {
         this.socket.removeRequest(key);
         reject(new Error("Timeout waiting for response"));
-      }, 10000); // 10s timeout
+      }, 15000); // 15s timeout
 
       this.socket.addRequest(key, {
         shopId,
