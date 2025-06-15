@@ -39,7 +39,7 @@ export class SocketServer {
       socket.on("shopee_product_detail_response", (payload: MessageResponse) => {
         const { shopId, itemId, data } = payload;
         const key = `${shopId}_${itemId}`;
-        console.log("💌 Socket.io received Message: shopee_product_detail_response", key);
+        console.log("💌 Socket.io received message: shopee_product_detail_response", key);
 
         const req = this.requests.get(key);
         if (req) {
