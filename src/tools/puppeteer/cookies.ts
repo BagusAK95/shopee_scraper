@@ -1,20 +1,19 @@
 import puppeteer from "puppeteer-extra";
-import { Page } from "puppeteer";
 
 const stealthPlugin = require("puppeteer-extra-plugin-stealth");
 puppeteer.use(stealthPlugin());
 
-// const proxyPlugin = require("puppeteer-extra-plugin-proxy");
-// puppeteer.use(
-//   proxyPlugin({
-//     address: "tpt16bu0.as.thordata.net",
-//     port: 9999,
-//     credentials: {
-//       username: "td-customer-yXyRF9s3tfvr-country-tw",
-//       password: "OxyhBt7a3qhn",
-//     },
-//   })
-// );
+const proxyPlugin = require("puppeteer-extra-plugin-proxy");
+puppeteer.use(
+  proxyPlugin({
+    address: process.env.PROXY_ADDRESS,
+    port: process.env.PROXY_PORT,
+    credentials: {
+      username: process.env.PROXY_USERNAME,
+      password: process.env.PROXY_PASSWORD,
+    },
+  })
+);
 
 (async () => {
   const browser = await puppeteer.launch({
@@ -72,27 +71,28 @@ puppeteer.use(stealthPlugin());
   });
 
   // Block images for faster loading
-  // page.on("request", (req) => {
-  //   if (["image"].includes(req.resourceType())) {
-  //     req.abort();
-  //   } else {
-  //     req.continue();
-  //   }
-  // });
+  page.on("request", (req) => {
+    if (["image"].includes(req.resourceType())) {
+      req.abort();
+    } else {
+      req.continue();
+    }
+  });
 
   try {
-    await page.goto("https://shopee.tw", {
+    await page.goto("https://shopee.tw/a-i.1439463026.28430488074", {
       waitUntil: "domcontentloaded",
     });
 
     const apiResp = await page.waitForResponse(
-      (res) => res.url().includes("https://shopee.tw/api/v4/pdp"),
+      (res) => res.url().includes("/api/v4/pdp/"),
       { timeout: 300000 }
     );
 
     const jsonResp = await apiResp.json();
     console.log(jsonResp);
 
+    // Debug mode
     await new Promise((resolve) => setTimeout(resolve, 99999999));
   } catch (e) {
     console.error(e);

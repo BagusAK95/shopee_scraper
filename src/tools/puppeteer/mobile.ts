@@ -7,11 +7,11 @@ puppeteer.use(stealthPlugin());
 const proxyPlugin = require("puppeteer-extra-plugin-proxy");
 puppeteer.use(
   proxyPlugin({
-    address: "tpt16bu0.as.thordata.net",
-    port: 9999,
+    address: process.env.PROXY_ADDRESS,
+    port: process.env.PROXY_PORT,
     credentials: {
-      username: "td-customer-yXyRF9s3tfvr-country-tw",
-      password: "OxyhBt7a3qhn",
+      username: process.env.PROXY_USERNAME,
+      password: process.env.PROXY_PASSWORD,
     },
   })
 );
@@ -29,7 +29,7 @@ puppeteer.use(
       "--start-maximized",
       "--disable-features=NetworkService",
       "--force-ipv4",
-      "--auto-open-devtools-for-tabs",
+      // "--auto-open-devtools-for-tabs",
     ],
   });
 
@@ -50,28 +50,31 @@ puppeteer.use(
     });
   });
 
-  // await page.setRequestInterception(true);
-  // page.on("request", (request) => {
-  //   if (request.url().includes(".js")) {
-  //     request.abort();
-  //   } else {
-  //     request.continue();
-  //   }
-  // });
+  // Block images for faster loading
+  await page.setRequestInterception(true);
+  page.on("request", (req) => {
+    const type = req.resourceType();
+    if (["image"].includes(type)) {
+      req.abort();
+    } else {
+      req.continue();
+    }
+  });
 
   try {
-    await page.goto("https://shopee.tw", {
+    await page.goto("https://shopee.tw/a-i.1439463026.28430488074", {
       waitUntil: "domcontentloaded",
     });
 
     const apiResp = await page.waitForResponse(
-      (res) => res.url().includes("/api/v4/pdp/get_pc"),
+      (res) => res.url().includes("/api/v4/pdp/"),
       { timeout: 300000 }
     );
 
     const jsonResp = await apiResp.json();
     console.log(jsonResp);
 
+    // Debug mode
     await new Promise((resolve) => setTimeout(resolve, 99999999));
   } catch (e) {
     console.error(e);
