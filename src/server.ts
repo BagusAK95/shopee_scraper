@@ -1,28 +1,20 @@
-// Core modules and third-party dependencies
-import express from 'express';
-import cors from 'cors';
-import bodyParser from 'body-parser';
-import http from 'http';
-import { SocketServer } from './infrastructure/socket/socket';
-import { rateLimiter } from './utils/limiter/limiter';
+import ApiServer from './infrastructure/api/api';
+import SocketServer from './infrastructure/socket/socket';
 import { Router } from './router';
+import http from 'http';
 
-const app = express();
-
-// Middleware setup
-app.use(rateLimiter);
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-app.use(cors());
+// API server
+const app = new ApiServer();
+const api = app.init();
 
 // Socket.io server
-const server = http.createServer(app);
+const server = http.createServer(api);
 const socket = new SocketServer(server);
 socket.listen();
 
 // API routes
 const router = new Router(socket);
-app.use('/', router.init());
+api.use('/', router.init());
 
 // Start server
 const PORT = process.env.PORT || 3000;

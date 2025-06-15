@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { validateGetProduct } from "../utils/validator/shopee";
 import ShopeeController from "../controller/shopee";
-import { SocketServer } from "../infrastructure/socket/socket";
+import SocketServer from "../infrastructure/socket/socket";
 
 export default class ShopeeRouter {
   private router: Router;

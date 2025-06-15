@@ -20,7 +20,7 @@ interface SocketClient {
   state: 'idle' | 'busy';
 }
 
-export class SocketServer {
+export default class SocketServer {
   private io: Server;
   private clients: Map<string, SocketClient>;
   private requests: Map<string, MessageRequest>;

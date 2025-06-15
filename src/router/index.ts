@@ -1,6 +1,6 @@
 import { Router as ExpressRouter } from "express";
 import ShopeeRouter from "./shopee";
-import { SocketServer } from "../infrastructure/socket/socket";
+import SocketServer from "../infrastructure/socket/socket";
 
 export class Router {
     private socket: SocketServer;

@@ -1,5 +1,5 @@
 import createError from "http-errors";
-import { SocketServer } from "../infrastructure/socket/socket";
+import SocketServer from "../infrastructure/socket/socket";
 
 export default class ShopeeService {
   private socket: SocketServer;
