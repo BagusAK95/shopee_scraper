@@ -33,13 +33,13 @@ export class SocketServer {
 
   listen() {
     this.io.on("connection", (socket: Socket) => {
-      console.log("🟢 Client connected", socket.id);
+      console.log("🟢 Socket.io client connected:", socket.id);
       this.clients.set(socket.id, { socket, state: 'idle' });
 
       socket.on("shopee_product_detail_response", (payload: MessageResponse) => {
         const { shopId, itemId, data } = payload;
         const key = `${shopId}_${itemId}`;
-        console.log("💌 Received Message: shopee_product_detail_response", key);
+        console.log("💌 Socket.io received Message: shopee_product_detail_response", key);
 
         const req = this.requests.get(key);
         if (req) {
@@ -52,7 +52,7 @@ export class SocketServer {
       });
 
       socket.on("disconnect", () => {
-        console.log("🔴 Client disconnected", socket.id);
+        console.log("🔴 Socket.io client disconnected:", socket.id);
         this.clients.delete(socket.id);
       });
 
